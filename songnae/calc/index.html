@@ -66,7 +66,8 @@ header p{margin:4px 0 0;color:var(--muted)}
 .vat li.all{font-weight:700;color:var(--ink)}
 .lsum{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .lsum b{font-family:var(--f-head);font-size:26px;font-variant-numeric:tabular-nums;color:var(--accent)}
-.lsum .btn{padding:9px 18px}
+.lsum .btn{padding:9px 18px}.lsum{flex-wrap:nowrap}.lsum>div{flex:1 1 auto;min-width:0}.lsum>.lbtn{flex:0 0 auto;display:flex;flex-direction:column;gap:6px}.lsum .lbtn .btn{padding:6px 14px;font-size:14px;text-align:center}
+.mbar,.mbar:not([hidden]){display:none!important}   
 .cl2{margin:0;padding:0;list-style:none;display:grid;gap:2px}
 .cl2 .ci{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 0;border-bottom:1px dashed var(--line);font-size:14px}
 .cl2 .ci:last-child{border-bottom:0}
@@ -119,9 +120,9 @@ button:focus-visible,a:focus-visible,textarea:focus-visible{outline:3px solid va
 .plan figcaption{font-size:13px;opacity:.75;text-align:center}
 .plan .pi{position:relative;width:100%}.plan.big .pi{width:220%}.plan.big img{width:100%}
 .plan svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.plan svg rect{fill:rgba(30,111,217,.42);stroke:#1e6fd9;stroke-width:4;rx:6}
-.hlcap{font-size:14px;font-weight:700;text-align:center;color:var(--ink);min-height:1.4em}
-@media (max-width:760px){ .plan:not(.big){position:sticky;top:env(safe-area-inset-top,0px);z-index:5;padding:6px;gap:2px;box-shadow:0 4px 12px rgba(0,0,0,.12)} .plan:not(.big) .pi{max-width:calc(25vh*1.06);margin:0 auto} .plan:not(.big) figcaption{font-size:11px} }
+.plan svg,.hlcap{display:none}   
+#lbox{gap:4px;padding:10px 14px;position:sticky;top:env(safe-area-inset-top,0px);z-index:6;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.lnow{font-size:14px;font-weight:700;color:var(--ink);min-height:1.4em}.lnow span{color:var(--accent)}
 </style>
 
 <div class="wrap">
@@ -147,10 +148,12 @@ button:focus-visible,a:focus-visible,textarea:focus-visible{outline:3px solid va
   <div class="empty" id="empty">평형을 고르면 공통공사부터 부대공사까지 공정이 순서대로 나옵니다 (처음엔 전체 리모델링으로 골라져 있음).</div>
   <div class="grid" id="main" hidden>
     <div class="left">
-      <div class="bar1">
-        <div class="lbl">3. 공정별로 고르기 — 처음엔 전체 리모델링으로 골라져 있습니다. 공정마다 바꿔 보세요.</div>
-        <div class="lsum"><div><div class="lbl">예상 공사비 (부가세 별도)</div><b id="lbig"></b></div><button type="button" class="btn ghost" id="clear" data-clear="1">초기화</button></div>
+      <div class="bar1" id="lbox">
+        <div class="lbl">3. 공정별로 고르기</div>
+        <div class="lsum"><div><div class="lbl">예상 공사비 (부가세 별도)</div><b id="lbig"></b></div><div class="lbtn"><button type="button" class="btn ghost" id="clear" data-clear="1">초기화</button><a class="btn ghost" href="#sum">내역 보기</a></div></div>
+        <div class="lnow" id="lnow"></div>
       </div>
+      <div class="exl" style="padding:0 4px">처음엔 전체 리모델링으로 골라져 있습니다. 공정마다 바꿔 보세요 — 위 금액이 바로 바뀝니다.</div>
       <div id="rows" style="display:grid;gap:10px"></div>
     </div>
     <aside id="sum" aria-live="polite">
@@ -238,7 +241,7 @@ function render(){
   const T = total(st), on = lines(st);
   let rawAll = 0; if (on) on.forEach(i=>rawAll += P().amt[i]);
   const f = rawAll ? T/rawAll : 0;
-  const share = [];
+  const share = []; let now = "";   // now = 방금 바꾼 공정 금액 (위 고정 칸에 보임)
   document.getElementById("rows").innerHTML = P().rows.map((R,ri)=>{
     const c = st.ch[R.k], exs = st.ex[R.k] || [];
     const set = new Set(); if (c != null) R.ch[c].on.forEach(i=>set.add(i));
@@ -248,6 +251,7 @@ function render(){
     const amt = raw;   // 10/19: 칸 금액 = 넣은 단가 합 그대로
     const ask = (c!=null && R.ch[c]?.ask) || R.ex.find(e=>e.ask && exs.includes(e.n))?.ask;   // 1 = 추후 상담, 글 = 그 글 (10/19 키큰장 '협의')   // 10/19 '추후 상담' 고른 칸
     const hdr = amt ? won(amt) + (ask ? ' + ' + (ask===1?'상담':ask) : '') : (ask ? (ask===1?'추후 상담':ask) : won(amt)); 
+    if (R.k === st.hl) now = `${ri+2}. ${R.t} <span>${set.size ? hdr : '0원'}</span>`;
     if (set.size) share.push([R.t, amt, ask]);   // ask = 추후 상담 (10/19 필름)
     if (R.bar && R.multi)
       return `<div class="row"><div class="hd"><h2><span class="no">${ri+2}</span>${R.t}</h2><span class="sub${set.size?'':' off'}">${set.size?hdr:'0원'}</span></div>
@@ -282,6 +286,7 @@ function render(){
   document.getElementById("big").textContent = won(T);
   document.getElementById("mbig").textContent = won(T);
   document.getElementById("lbig").textContent = T ? won(T) : "0원 (공정을 골라 주세요)";
+  document.getElementById("lnow").innerHTML = now || "아래에서 공정을 바꾸면 그 공정 금액이 여기 나옵니다";
   document.getElementById("won").textContent = T ? T.toLocaleString("ko-KR") + "원" : "공종을 골라 주세요";
   const V = vat(T);
   document.getElementById("vat").innerHTML = T ? `<li><span>부가세 (10%)</span><span>${won(V)}</span></li><li class="all"><span>부가세 포함 합계</span><span>${won(T+V)}</span></li>` : "";
