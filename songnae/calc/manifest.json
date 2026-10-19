@@ -1,4 +1,6 @@
 {
+ "id": "/songnae/calc/",
+ "scope": "/songnae/calc/",
  "name": "송내 주공1단지 견적 계산기",
  "short_name": "하론 견적",
  "start_url": "/songnae/calc/",
