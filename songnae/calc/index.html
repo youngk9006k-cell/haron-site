@@ -153,7 +153,6 @@ button:focus-visible,a:focus-visible,textarea:focus-visible{outline:3px solid va
         <div class="lsum"><div><div class="lbl">예상 공사비 (부가세 별도)</div><b id="lbig"></b></div><div class="lbtn"><button type="button" class="btn ghost" id="clear" data-clear="1">초기화</button><a class="btn ghost" href="#sum">내역 보기</a></div></div>
         <div class="lnow" id="lnow"></div>
       </div>
-      <div class="exl" style="padding:0 4px">처음엔 전체 리모델링으로 골라져 있습니다. 공정마다 바꿔 보세요 — 위 금액이 바로 바뀝니다.</div>
       <div id="rows" style="display:grid;gap:10px"></div>
     </div>
     <aside id="sum" aria-live="polite">
@@ -286,7 +285,9 @@ function render(){
   document.getElementById("big").textContent = won(T);
   document.getElementById("mbig").textContent = won(T);
   document.getElementById("lbig").textContent = T ? won(T) : "0원 (공정을 골라 주세요)";
-  document.getElementById("lnow").innerHTML = now || "아래에서 공정을 바꾸면 그 공정 금액이 여기 나옵니다";
+
+  const preNote = st.pre ? `위 금액은 <b>${st.pre === "고급" ? "고급 올수리" : "기본 올수리"}</b> 기준 대략 견적입니다.<br>아래에서 공정을 바꾸면 금액이 바로 바뀝니다.` : "";
+  document.getElementById("lnow").innerHTML = now || preNote || "아래에서 공정을 고르면 금액이 여기 나옵니다";
   document.getElementById("won").textContent = T ? T.toLocaleString("ko-KR") + "원" : "공종을 골라 주세요";
   const V = vat(T);
   document.getElementById("vat").innerHTML = T ? `<li><span>부가세 (10%)</span><span>${won(V)}</span></li><li class="all"><span>부가세 포함 합계</span><span>${won(T+V)}</span></li>` : "";
