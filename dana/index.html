@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>다나 공부</title>
+<style>
+  :root{
+    --bg:#f4f2ec; --card:#ffffff; --ink:#1b1a17; --soft:#6a675f; --line:#e0dcd0;
+    --accent:#2f6f5e; --accent-ink:#ffffff; --accent-soft:#e3efe9;
+    --ok:#1f7a4d; --ok-bg:#e2f3e8; --no:#b3402a; --no-bg:#fae6e1;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#14171a; --card:#1e2327; --ink:#ecebe6; --soft:#9aa0a3; --line:#30373c;
+      --accent:#5fb79d; --accent-ink:#0f1a16; --accent-soft:#22332e;
+      --ok:#6fd09a; --ok-bg:#1c3327; --no:#f08b74; --no-bg:#3a221d;
+    }
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+    line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:640px; margin:0 auto; padding:20px 16px 60px;}
+  header{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:14px;}
+  h1{font-size:22px; margin:0; letter-spacing:-0.02em;}
+  .today{font-size:13px; color:var(--soft); font-variant-numeric:tabular-nums;}
+  .tabs{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:10px;}
+  .tabs button, .modes button{
+    font:inherit; border:1px solid var(--line); background:var(--card); color:var(--ink);
+    border-radius:10px; padding:10px 4px; cursor:pointer;
+  }
+  .tabs button{font-weight:700; font-size:16px;}
+  .tabs button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
+  .modes{display:flex; gap:6px; margin-bottom:14px;}
+  .modes button{flex:1; font-size:14px; padding:8px 4px;}
+  .modes button[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent); font-weight:700;}
+  .panel{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px 18px;}
+  .meta{display:flex; justify-content:space-between; font-size:13px; color:var(--soft); margin-bottom:12px; font-variant-numeric:tabular-nums;}
+  .tag{color:var(--accent); font-weight:700;}
+  .q{font-size:19px; font-weight:600; margin:0 0 18px; word-break:keep-all; line-height:1.7;}
+  .q .big{display:block; font-size:34px; font-weight:700; margin:6px 0; letter-spacing:0.04em;}
+  .q sup{font-size:0.65em;}
+  .choices{display:grid; gap:8px;}
+  .choices button{
+    font:inherit; font-size:16px; text-align:left; border:1px solid var(--line); background:var(--bg); color:var(--ink);
+    border-radius:12px; padding:13px 14px; cursor:pointer; word-break:keep-all;
+  }
+  .choices button:disabled{cursor:default; opacity:1;}
+  .choices button.ok{background:var(--ok-bg); border-color:var(--ok); color:var(--ok); font-weight:700;}
+  .choices button.no{background:var(--no-bg); border-color:var(--no); color:var(--no);}
+  .explain{margin-top:14px; padding:12px 14px; border-radius:12px; background:var(--accent-soft); font-size:15px; word-break:keep-all;}
+  .explain b{color:var(--accent);}
+  .next{
+    margin-top:14px; width:100%; font:inherit; font-size:16px; font-weight:700; border:0; border-radius:12px;
+    padding:14px; background:var(--accent); color:var(--accent-ink); cursor:pointer;
+  }
+  .flash{min-height:210px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; cursor:pointer; user-select:none;}
+  .flash .front{font-size:34px; font-weight:700; letter-spacing:0.02em;}
+  .flash .back{font-size:18px; margin-top:14px; word-break:keep-all;}
+  .flash .hint{font-size:13px; color:var(--soft); margin-top:16px;}
+  .row{display:flex; gap:8px; margin-top:14px;}
+  .row button{flex:1; font:inherit; font-size:15px; border:1px solid var(--line); background:var(--bg); color:var(--ink); border-radius:12px; padding:12px; cursor:pointer;}
+  .empty{text-align:center; color:var(--soft); padding:40px 0;}
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:14px;}
+  .stats div{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:10px 4px; text-align:center; font-size:12px; color:var(--soft);}
+  .stats strong{display:block; font-size:17px; color:var(--ink); font-variant-numeric:tabular-nums;}
+  .reset{display:block; margin:18px auto 0; font:inherit; font-size:12px; color:var(--soft); background:none; border:0; text-decoration:underline; cursor:pointer;}
+  button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>다나 공부</h1>
+    <div class="today" id="today"></div>
+  </header>
+  <div class="tabs" id="tabs"></div>
+  <div class="modes" id="modes"></div>
+  <div class="panel" id="panel"></div>
+  <div class="stats" id="stats"></div>
+  <button class="reset" id="reset">기록 지우기</button>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- 도구 ---------- */
+function ri(a,b){return a+Math.floor(Math.random()*(b-a+1));}
+function pick(arr){return arr[ri(0,arr.length-1)];}
+function shuffle(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=ri(0,i);var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function fmt(n){return n<0?'−'+(-n):''+n;}
+function sup(s){return '<sup>'+s+'</sup>';}
+function sub(s){return '<sub>'+s+'</sub>';}
+function poly(terms){
+  var s='';
+  terms.forEach(function(t){
+    var c=t[0],p=t[1]; if(c===0) return;
+    var abs=Math.abs(c);
+    var body=((abs===1&&p>0)?'':abs)+(p>0?'x'+(p>1?sup(p):''):'');
+    s+= s ? (c<0?' − ':' + ')+body : (c<0?'−':'')+body;
+  });
+  return s||'0';
+}
+/* 보기 만들기: 정답과 오답 후보에서 4지선다 */
+function mc(tag,q,answer,wrongs,ex){
+  var seen={}; seen[answer]=1; var ws=[];
+  shuffle(wrongs).forEach(function(w){ if(!seen[w]&&ws.length<3){seen[w]=1;ws.push(w);} });
+  var choices=shuffle([answer].concat(ws));
+  return {tag:tag,q:q,choices:choices,a:choices.indexOf(answer),ex:ex||''};
+}
+function numMc(tag,q,ans,ex,extra){
+  var cand=(extra||[]).slice();
+  [1,-1,2,-2,3,-3,5,-5,10,-10].forEach(function(d){cand.push(ans+d);});
+  cand.push(-ans); cand.push(ans*2);
+  cand=cand.filter(function(v){return v!==ans;});
+  return mc(tag,q,fmt(ans),cand.map(fmt),ex);
+}
+
+/* ---------- 수학 (수학Ⅰ·Ⅱ) ---------- */
+var TRIG={
+  ang:[[30,'π/6'],[45,'π/4'],[60,'π/3'],[120,'2π/3'],[135,'3π/4'],[150,'5π/6']],
+  sin:['1/2','√2/2','√3/2','√3/2','√2/2','1/2'],
+  cos:['√3/2','√2/2','1/2','−1/2','−√2/2','−√3/2'],
+  tan:['√3/3','1','√3','−√3','−1','−√3/3'],
+  pool:['1/2','−1/2','√2/2','−√2/2','√3/2','−√3/2','√3/3','−√3/3','√3','−√3','1','−1','0']
+};
+var POW=[[8,'2/3',4],[27,'2/3',9],[16,'3/4',8],[4,'3/2',8],[9,'3/2',27],[32,'2/5',4],[81,'3/4',27],[25,'3/2',125],[16,'5/4',32],[64,'2/3',16]];
+var MATH=[
+  function(){ var p=pick(POW);
+    return numMc('지수',p[0]+sup(p[1])+' 의 값은?',p[2],'밑을 거듭제곱 꼴로 고친 뒤 지수끼리 곱합니다. (a'+sup('m')+')'+sup('n')+' = a'+sup('mn')); },
+  function(){ var b=pick([2,3]),m=ri(1,4),n=ri(1,4);
+    return numMc('로그','log'+sub(b)+' '+Math.pow(b,m)+' + log'+sub(b)+' '+Math.pow(b,n)+' 의 값은?',m+n,
+      'log'+sub(b)+' '+Math.pow(b,m)+' = '+m+', log'+sub(b)+' '+Math.pow(b,n)+' = '+n+' 이므로 합은 '+(m+n)+'.'); },
+  function(){ var b=pick([2,3]),m=ri(2,4),k=pick([2,3,5,7].filter(function(v){return v!==b;}));
+    return numMc('로그','log'+sub(b)+' '+(Math.pow(b,m)*k)+' − log'+sub(b)+' '+k+' 의 값은?',m,
+      '로그의 뺄셈은 진수의 나눗셈: log'+sub(b)+' ('+(Math.pow(b,m)*k)+' ÷ '+k+') = log'+sub(b)+' '+Math.pow(b,m)+' = '+m+'.'); },
+  function(){ var i=ri(0,5),f=pick(['sin','cos','tan']),rad=Math.random()<0.5;
+    var a=TRIG.ang[i], ans=TRIG[f][i];
+    return mc('삼각함수',f+' '+(rad?a[1]:a[0]+'°')+' 의 값은?',ans,TRIG.pool,
+      (rad?a[1]+' = '+a[0]+'°. ':'')+'특수각 값과 사분면별 부호(1사분면 모두 +, 2사분면 sin만 +)를 함께 기억하세요.'); },
+  function(){ var a=ri(-5,9),d=ri(2,6),n=ri(8,20),ans=a+(n-1)*d;
+    return numMc('등차수열','첫째항이 '+fmt(a)+', 공차가 '+d+'인 등차수열의 제'+n+'항은?',ans,
+      'a'+sub('n')+' = a + (n−1)d = '+fmt(a)+' + '+(n-1)+'×'+d+' = '+fmt(ans)+'.',[a+n*d,a+(n-2)*d]); },
+  function(){ var a=ri(1,9),d=ri(2,5),n=10,ans=n*(2*a+(n-1)*d)/2;
+    return numMc('등차수열','첫째항이 '+a+', 공차가 '+d+'인 등차수열의 첫째항부터 제10항까지의 합은?',ans,
+      'S'+sub('n')+' = n{2a + (n−1)d}/2 = 10×('+(2*a)+' + 9×'+d+')/2 = '+ans+'.',[n*(2*a+n*d)/2,n*(a+(n-1)*d)]); },
+  function(){ var a=ri(1,3),r=pick([2,3,-2]),n=ri(4,6),ans=a*Math.pow(r,n-1);
+    return numMc('등비수열','첫째항이 '+a+', 공비가 '+fmt(r)+'인 등비수열의 제'+n+'항은?',ans,
+      'a'+sub('n')+' = a·r'+sup('n−1')+' = '+a+'×('+fmt(r)+')'+sup(n-1)+' = '+fmt(ans)+'.',[a*Math.pow(r,n),a*Math.pow(r,n-2)]); },
+  function(){ var a=ri(2,4),b=ri(1,5),n=ri(5,10),ans=a*n*(n+1)/2+b*n;
+    return numMc('수열의 합','Σ'+sub('k=1')+sup(n)+' ('+a+'k + '+b+') 의 값은?',ans,
+      'Σk = n(n+1)/2 = '+(n*(n+1)/2)+' 이므로 '+a+'×'+(n*(n+1)/2)+' + '+b+'×'+n+' = '+ans+'.',[a*n*(n+1)/2+b,a*n*(n+1)/2]); },
+  function(){ var n=ri(3,10),ans=n*(n+1)*(2*n+1)/6;
+    return numMc('수열의 합','Σ'+sub('k=1')+sup(n)+' k'+sup(2)+' 의 값은?',ans,
+      'Σk'+sup(2)+' = n(n+1)(2n+1)/6 = '+n+'×'+(n+1)+'×'+(2*n+1)+'/6 = '+ans+'.',[n*(n+1)/2,Math.pow(n*(n+1)/2,2)]); },
+  function(){ var a=ri(2,9);
+    return numMc('함수의 극한','lim'+sub('x→'+a)+' (x'+sup(2)+' − '+(a*a)+') / (x − '+a+') 의 값은?',2*a,
+      '분자를 (x − '+a+')(x + '+a+')로 인수분해하고 약분하면 x + '+a+' → '+(2*a)+'.',[a,a*a,0]); },
+  function(){ var q=ri(2,4),m=ri(2,5),p=q*m,b=ri(1,9),c=ri(1,9);
+    return numMc('함수의 극한','lim'+sub('x→∞')+' ('+p+'x'+sup(2)+' + '+b+'x) / ('+q+'x'+sup(2)+' − '+c+') 의 값은?',m,
+      '분자·분모의 차수가 같으면 최고차항 계수의 비: '+p+'/'+q+' = '+m+'.',[p,q,0]); },
+  function(){ var a=ri(1,3),b=ri(-4,4),c=ri(-5,5),k=pick([-2,-1,1,2,3]),ans=3*a*k*k+2*b*k+c;
+    return numMc('미분','f(x) = '+poly([[a,3],[b,2],[c,1]])+' 일 때, f′('+fmt(k)+') 의 값은?',ans,
+      'f′(x) = '+poly([[3*a,2],[2*b,1],[c,0]])+' 에 x = '+fmt(k)+' 대입 → '+fmt(ans)+'.',[a*k*k*k+b*k*k+c*k]); },
+  function(){ var a=ri(1,3),c=ri(-5,5),mx=Math.random()<0.5,ans=(mx?2:-2)*a*a*a+c;
+    return numMc('도함수의 활용','f(x) = '+poly([[1,3],[-3*a*a,1],[c,0]])+' 의 '+(mx?'극댓값':'극솟값')+'은?',ans,
+      'f′(x) = 3x'+sup(2)+' − '+(3*a*a)+' = 0 에서 x = ±'+a+'. x = −'+a+'에서 극대, x = '+a+'에서 극소. '+(mx?'f(−'+a+')':'f('+a+')')+' = '+fmt(ans)+'.',
+      [(mx?-2:2)*a*a*a+c,c]); },
+  function(){ var a=ri(1,2),b=ri(-3,3),c=ri(-4,6),k=ri(1,3),ans=a*k*k*k+b*k*k+c*k;
+    return numMc('적분','∫'+sub('0')+sup(k)+' ('+poly([[3*a,2],[2*b,1],[c,0]])+') dx 의 값은?',ans,
+      '부정적분은 '+poly([[a,3],[b,2],[c,1]])+'. x = '+k+' 을 대입한 값에서 x = 0 을 대입한 값(0)을 빼면 '+fmt(ans)+'.',
+      [3*a*k*k+2*b*k+c]); }
+];
+function genMath(){return pick(MATH)();}
+
+/* ---------- 영어 (수능 어휘) ---------- */
+var EN=[
+['abandon','버리다, 포기하다'],['abstract','추상적인'],['abundant','풍부한'],['accumulate','축적하다'],
+['acknowledge','인정하다'],['adequate','충분한, 적절한'],['advocate','옹호하다; 지지자'],['alter','바꾸다, 고치다'],
+['ambiguous','모호한'],['anticipate','예상하다'],['apparent','명백한'],['arbitrary','임의의, 제멋대로인'],
+['assess','평가하다'],['attribute','~의 탓(덕)으로 돌리다; 속성'],['bias','편견'],['coherent','논리 정연한, 일관성 있는'],
+['coincide','동시에 일어나다, 일치하다'],['compensate','보상하다'],['comprehensive','포괄적인'],['conceive','생각해 내다, 상상하다'],
+['constrain','제약하다'],['contradict','모순되다, 반박하다'],['controversial','논란이 많은'],['conventional','관습적인, 전통적인'],
+['deliberate','의도적인, 신중한'],['demonstrate','입증하다, 보여 주다'],['deprive','빼앗다'],['derive','끌어내다, 유래하다'],
+['diminish','줄어들다, 줄이다'],['distinguish','구별하다'],['diverse','다양한'],['eliminate','제거하다'],
+['emerge','나타나다'],['enhance','향상시키다'],['exaggerate','과장하다'],['exclude','제외하다'],
+['facilitate','촉진하다, 쉽게 하다'],['fundamental','근본적인'],['hypothesis','가설'],['implication','함축, 영향'],
+['inevitable','피할 수 없는'],['inherent','내재하는, 타고난'],['integrate','통합하다'],['interpret','해석하다'],
+['justify','정당화하다'],['maintain','유지하다, 주장하다'],['neglect','소홀히 하다, 방치하다'],['notion','개념, 생각'],
+['objective','객관적인; 목표'],['obstacle','장애물'],['perceive','인지하다'],['persist','지속하다, 고집하다'],
+['phenomenon','현상'],['plausible','그럴듯한'],['precede','앞서다, 선행하다'],['prevail','우세하다, 널리 퍼지다'],
+['reinforce','강화하다'],['reluctant','꺼리는, 마지못한'],['scarce','부족한, 드문'],['subsequent','그다음의, 이후의'],
+['substitute','대체하다; 대체물'],['suppress','억누르다, 진압하다'],['undermine','약화시키다'],['vulnerable','취약한'],
+['withdraw','철회하다, 인출하다']
+];
+function genEn(){
+  var w=pick(EN), rev=Math.random()<0.35;
+  var others=EN.filter(function(x){return x!==w;});
+  if(rev) return mc('뜻 → 단어','<span class="big" style="font-size:22px">'+w[1]+'</span>에 해당하는 단어는?',w[0],others.map(function(x){return x[0];}),w[0]+' : '+w[1]);
+  return mc('단어 → 뜻','<span class="big">'+w[0]+'</span>의 뜻은?',w[1],others.map(function(x){return x[1];}),w[0]+' : '+w[1]);
+}
+
+/* ---------- 국어 (맞춤법·문법·문학 개념) ---------- */
+/* [분류, 문제, 정답, 오답들, 해설] */
+var KO=[
+['맞춤법','"오늘이 몇 월 ( )이지?" 빈칸에 알맞은 표기는?','며칠',['몇일','몇 일'],'‘몇일’이라는 표기는 없습니다. 항상 ‘며칠’로 적습니다.'],
+['맞춤법','"그러면 안 ( )." 빈칸에 알맞은 표기는?','돼',['되'],'‘되어’로 바꿀 수 있으면 ‘돼’. "안 되어" → "안 돼".'],
+['맞춤법','"소문이 ( ) 퍼졌다." 빈칸에 알맞은 표기는?','금세',['금새'],'‘금시에’가 줄어든 말이므로 ‘금세’.'],
+['맞춤법','올바른 표기는?','설거지',['설겆이'],'‘설거지’가 표준어입니다.'],
+['맞춤법','올바른 표기는?','어이없다',['어의없다'],'‘어이없다’가 맞습니다. ‘어의’는 임금의 의원입니다.'],
+['맞춤법','"학생으( ) 해야 할 일" 빈칸에 알맞은 것은?','로서',['로써'],'자격·신분은 ‘로서’, 수단·도구는 ‘로써’.'],
+['맞춤법','"감기가 다 ( )." 빈칸에 알맞은 표기는?','나았다',['낳았다','낫았다'],'병이 고쳐지다는 ‘낫다’. ㅅ 불규칙이라 ‘나았다’.'],
+['맞춤법','"오늘은 ( ) 기분이 좋다." 빈칸에 알맞은 표기는?','왠지',['웬지'],'‘왜인지’의 준말이므로 ‘왠지’. 그 밖에는 ‘웬’(웬일, 웬 떡).'],
+['맞춤법','"이게 ( ) 떡이냐?" 빈칸에 알맞은 표기는?','웬',['왠'],'‘어찌 된’의 뜻은 ‘웬’. ‘왠’은 ‘왠지’에만 씁니다.'],
+['맞춤법','"퀴즈의 정답을 ( )." 빈칸에 알맞은 말은?','맞혔다',['맞췄다'],'정답을 고르는 것은 ‘맞히다’, 서로 비교하거나 맞대는 것은 ‘맞추다’.'],
+['맞춤법','"손가락으로 북쪽을 ( )." 빈칸에 알맞은 말은?','가리켰다',['가르쳤다','가르켰다'],'방향을 지시하는 것은 ‘가리키다’, 지식을 알려 주는 것은 ‘가르치다’.'],
+['맞춤법','"부장님께 서류 ( )를 받았다." 빈칸에 알맞은 말은?','결재',['결제'],'상관의 승인은 ‘결재’, 대금 지급은 ‘결제’.'],
+['맞춤법','"친구에게 편지를 ( )." 빈칸에 알맞은 말은?','부쳤다',['붙였다'],'우편·짐을 보내는 것은 ‘부치다’, 달라붙게 하는 것은 ‘붙이다’.'],
+['맞춤법','"네가 행복하기를 ( )." 빈칸에 알맞은 표기는?','바라',['바래'],'기본형이 ‘바라다’이므로 ‘바라’. ‘바래다’는 색이 변하다.'],
+['맞춤법','"가( ) 말( ) 마음대로 해." 빈칸에 알맞은 것은?','든지',['던지'],'선택은 ‘-든지’, 과거 회상은 ‘-던지’.'],
+['맞춤법','올바른 표기는?','오랜만',['오랫만'],'‘오래간만’의 준말이므로 ‘오랜만’. (단, ‘오랫동안’)'],
+['음운','‘국물’이 [궁물]로 발음되는 현상은?','비음화',['유음화','구개음화','된소리되기'],'ㄱ이 비음 ㅁ 앞에서 비음 ㅇ으로 바뀝니다.'],
+['음운','‘굳이’가 [구지]로 발음되는 현상은?','구개음화',['비음화','유음화','거센소리되기'],'ㄷ, ㅌ이 모음 ‘ㅣ’ 앞에서 ㅈ, ㅊ으로 바뀝니다.'],
+['음운','‘신라’가 [실라]로 발음되는 현상은?','유음화',['비음화','구개음화','음절의 끝소리 규칙'],'ㄴ이 ㄹ 앞뒤에서 ㄹ로 바뀝니다.'],
+['음운','‘좋고’가 [조코]로 발음되는 현상은?','거센소리되기(축약)',['된소리되기(교체)','ㅎ 탈락','비음화(교체)'],'ㅎ + ㄱ → ㅋ. 두 음운이 하나로 줄어드는 축약입니다.'],
+['품사','"새 책을 샀다."에서 ‘새’의 품사는?','관형사',['형용사','부사','명사'],'체언을 꾸미고 활용하지 않으므로 관형사. (‘새로운’은 형용사)'],
+['품사','"빨리 달린다."에서 ‘빨리’의 품사는?','부사',['형용사','관형사','동사'],'용언을 꾸미고 활용하지 않으므로 부사.'],
+['문법','"할머니께서 진지를 잡수신다."에 쓰인 높임법은?','주체 높임',['객체 높임','상대 높임만','높임 없음'],'문장의 주어(할머니)를 높입니다. ‘께서’, ‘-시-’, ‘잡수다’.'],
+['문법','"선생님께 모르는 것을 여쭈어보았다."에서 ‘여쭈다’가 높이는 대상은?','객체(선생님)',['주체(나)','청자','서술어'],'부사어·목적어가 가리키는 대상을 높이는 객체 높임입니다.'],
+['문법','"엄마가 아이에게 밥을 먹였다."의 문장 유형은?','사동문',['피동문','능동문만 해당','부정문'],'주어가 남에게 동작을 하게 하므로 사동. 접사 ‘-이-’.'],
+['문법','"도둑이 경찰에게 잡혔다."의 문장 유형은?','피동문',['사동문','주동문','명령문'],'주어가 동작을 당하므로 피동. 접사 ‘-히-’.'],
+['표현법','"내 마음은 호수요"에 쓰인 표현법은?','은유법',['직유법','의인법','반어법'],'‘A는 B이다’ 꼴로 연결어 없이 빗대는 은유.'],
+['표현법','"이것은 소리 없는 아우성"에 쓰인 표현법은?','역설법',['반어법','직유법','대구법'],'겉으로는 모순되지만 속에 진실을 담는 표현.'],
+['표현법','"죽어도 아니 눈물 흘리오리다"(진달래꽃)에 쓰인 표현법은?','반어법',['역설법','은유법','과장법'],'속마음(슬픔)과 반대로 말하여 의미를 강조합니다.'],
+['심상','"분수처럼 흩어지는 푸른 종소리"에 나타난 심상은?','공감각적 심상(청각의 시각화)',['공감각적 심상(시각의 청각화)','촉각적 심상','후각적 심상'],'청각(종소리)을 시각(푸른, 흩어지는)으로 옮겼습니다.'],
+['시점','작품 속 ‘나’가 주인공을 관찰하여 이야기하는 시점은?','1인칭 관찰자 시점',['1인칭 주인공 시점','전지적 작가 시점','3인칭 관찰자 시점'],'‘나’가 등장하지만 주인공은 다른 인물입니다. 예: 「사랑손님과 어머니」'],
+['시점','작품 밖 서술자가 인물의 속마음까지 모두 알고 서술하는 시점은?','전지적 작가 시점',['3인칭 관찰자 시점','1인칭 주인공 시점','1인칭 관찰자 시점'],'서술자가 신처럼 인물의 심리와 사건 전체를 압니다.'],
+['고전','평시조에서 종장 첫 음보의 글자 수는?','3음절',['2음절','4음절','5음절'],'종장 첫 음보는 3음절로 고정됩니다.'],
+['고전','훈민정음 모음 기본자 ‘ㆍ, ㅡ, ㅣ’가 본뜬 것은?','하늘, 땅, 사람',['해, 달, 별','발음 기관','물, 불, 흙'],'모음은 천·지·인을, 자음 기본자는 발음 기관을 본떴습니다.'],
+['어휘','‘반추하다’의 뜻은?','지난 일을 되풀이하여 음미하다',['반대하여 물리치다','절반으로 나누다','빛을 되비추다'],'소가 되새김질하듯 곱씹어 생각한다는 뜻.'],
+['어휘','‘천착하다’의 뜻은?','깊이 파고들어 연구하다',['얕고 가볍게 다루다','천천히 도착하다','함부로 빼앗다'],'穿鑿: 구멍을 뚫듯 깊이 살핀다는 뜻.'],
+['어휘','"사고는 부주의에 ( )한다." 빈칸에 알맞은 말은?','기인',['기여','기탁','기피'],'‘기인하다’: 어떤 것에 원인을 두다.']
+];
+function genKo(){
+  var k=pick(KO);
+  return mc(k[0],k[1],k[2],k[3],k[4]);
+}
+
+/* ---------- 한자 (한자 성어) ---------- */
+var HJ=[
+['苦盡甘來','고진감래','고생 끝에 즐거움이 옴'],
+['結草報恩','결초보은','죽어서도 잊지 않고 은혜를 갚음'],
+['刻舟求劍','각주구검','융통성 없이 낡은 생각만 고집함'],
+['臥薪嘗膽','와신상담','목적을 이루려고 온갖 어려움을 참고 견딤'],
+['漁夫之利','어부지리','둘이 다투는 사이에 제삼자가 이익을 얻음'],
+['朝三暮四','조삼모사','간사한 꾀로 남을 속여 희롱함'],
+['塞翁之馬','새옹지마','인생의 길흉화복은 예측하기 어려움'],
+['事必歸正','사필귀정','모든 일은 반드시 바른길로 돌아감'],
+['易地思之','역지사지','처지를 바꾸어 생각해 봄'],
+['臨機應變','임기응변','그때그때 형편에 맞게 알맞이 처리함'],
+['自業自得','자업자득','자기가 저지른 일의 결과를 자기가 받음'],
+['轉禍爲福','전화위복','재앙이 바뀌어 오히려 복이 됨'],
+['切磋琢磨','절차탁마','학문이나 인격을 부지런히 갈고닦음'],
+['螢雪之功','형설지공','어려운 형편 속에서 꾸준히 공부하여 얻은 보람'],
+['溫故知新','온고지신','옛것을 익혀 새것을 앎'],
+['畫龍點睛','화룡점정','가장 중요한 부분을 마무리하여 일을 완성함'],
+['四面楚歌','사면초가','누구의 도움도 받을 수 없는 고립된 상태'],
+['焉敢生心','언감생심','감히 그런 마음을 품을 수도 없음'],
+['我田引水','아전인수','자기에게만 이롭게 생각하거나 행동함'],
+['牽强附會','견강부회','이치에 맞지 않는 말을 억지로 끌어다 붙임'],
+['指鹿爲馬','지록위마','윗사람을 농락하여 권세를 마음대로 휘두름'],
+['脣亡齒寒','순망치한','한쪽이 망하면 다른 쪽도 위태로워지는 밀접한 관계'],
+['錦上添花','금상첨화','좋은 일 위에 또 좋은 일이 더해짐'],
+['雪上加霜','설상가상','어려운 일이 겹쳐서 일어남'],
+['類類相從','유유상종','비슷한 사람끼리 서로 어울림'],
+['大器晩成','대기만성','크게 될 사람은 늦게 이루어짐'],
+['他山之石','타산지석','남의 하찮은 언행도 자기 수양에 도움이 됨'],
+['背恩忘德','배은망덕','입은 은혜를 잊고 배신함'],
+['亡羊補牢','망양보뢰','일을 그르친 뒤에 뉘우쳐도 소용이 없음'],
+['目不識丁','목불식정','글자를 전혀 모를 만큼 무식함'],
+['同病相憐','동병상련','같은 처지의 사람끼리 서로 가엾게 여김'],
+['馬耳東風','마이동풍','남의 말을 귀담아듣지 않고 흘려버림'],
+['束手無策','속수무책','손이 묶인 듯 어찌할 방법이 없음'],
+['知彼知己','지피지기','상대와 나의 사정을 자세히 앎'],
+['靑出於藍','청출어람','제자가 스승보다 나음'],
+['竹馬故友','죽마고우','어릴 때부터 같이 놀며 자란 벗'],
+['孤掌難鳴','고장난명','혼자서는 일을 이루기 어려움'],
+['燈下不明','등하불명','가까이 있는 것을 도리어 잘 모름'],
+['見物生心','견물생심','물건을 보면 갖고 싶은 욕심이 생김'],
+['甘呑苦吐','감탄고토','자기에게 이로우면 취하고 불리하면 버림']
+];
+function genHj(){
+  var h=pick(HJ), t=ri(0,2);
+  var others=HJ.filter(function(x){return x!==h;});
+  var ex=h[0]+' ('+h[1]+') : '+h[2];
+  if(t===0) return mc('한자 → 음','<span class="big">'+h[0]+'</span>의 음은?',h[1],others.map(function(x){return x[1];}),ex);
+  if(t===1) return mc('성어 → 뜻','<span class="big">'+h[0]+'</span>'+h[1]+'의 뜻은?',h[2],others.map(function(x){return x[2];}),ex);
+  return mc('뜻 → 성어','"'+h[2]+'"을 뜻하는 성어는?',h[1]+' '+h[0],others.map(function(x){return x[1]+' '+x[0];}),ex);
+}
+
+/* ---------- 과목 ---------- */
+var SUBJ={
+  '수학':{gen:genMath,note:'수학Ⅰ·Ⅱ 계산'},
+  '영어':{gen:genEn,note:'수능 어휘 '+EN.length+'개',cards:EN.map(function(w){return {f:w[0],b:w[1]};})},
+  '국어':{gen:genKo,note:'맞춤법·문법·문학 개념 '+KO.length+'문항'},
+  '한자':{gen:genHj,note:'한자 성어 '+HJ.length+'개',cards:HJ.map(function(h){return {f:h[0],b:h[1]+'<br>'+h[2]};})}
+};
+var NAMES=Object.keys(SUBJ);
+
+/* ---------- 기록 ---------- */
+var KEY='dana-study-v1';
+function today(){var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function blank(){var s={wrong:[],score:{},day:{date:today(),n:0,c:0}};NAMES.forEach(function(n){s.score[n]={n:0,c:0};});return s;}
+function load(){
+  var s=blank();
+  try{
+    var r=JSON.parse(localStorage.getItem(KEY));
+    if(r&&r.score&&r.wrong){
+      s.wrong=r.wrong;
+      NAMES.forEach(function(n){if(r.score[n]) s.score[n]=r.score[n];});
+      if(r.day&&r.day.date===today()) s.day=r.day;
+    }
+  }catch(e){}
+  return s;
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}}
+var store=load();
+
+/* ---------- 화면 ---------- */
+var $=function(id){return document.getElementById(id);};
+var cur={subj:NAMES[0],mode:'quiz',q:null,done:false,streak:0,card:0,flip:false,deck:null};
+
+function wrongOf(s){return store.wrong.filter(function(w){return w.s===s;});}
+
+function renderTabs(){
+  $('tabs').innerHTML=NAMES.map(function(n){
+    return '<button type="button" data-s="'+n+'" aria-pressed="'+(n===cur.subj)+'">'+n+'</button>';
+  }).join('');
+  var modes=[['quiz','문제 풀기']];
+  if(SUBJ[cur.subj].cards) modes.push(['cards','카드 외우기']);
+  modes.push(['wrong','오답 노트 '+wrongOf(cur.subj).length]);
+  $('modes').innerHTML=modes.map(function(m){
+    return '<button type="button" data-m="'+m[0]+'" aria-pressed="'+(m[0]===cur.mode)+'">'+m[1]+'</button>';
+  }).join('');
+}
+function renderStats(){
+  $('today').textContent='오늘 '+store.day.n+'문제 · 정답 '+store.day.c;
+  $('stats').innerHTML=NAMES.map(function(n){
+    var s=store.score[n], p=s.n?Math.round(s.c/s.n*100)+'%':'–';
+    return '<div><strong>'+p+'</strong>'+n+' '+s.c+'/'+s.n+'</div>';
+  }).join('');
+}
+function nextQ(){
+  cur.done=false;
+  if(cur.mode==='wrong'){
+    var list=wrongOf(cur.subj);
+    cur.q=list.length?pick(list.length>1?list.filter(function(w){return w!==cur.q;}):list):null;
+  }else{
+    cur.q=SUBJ[cur.subj].gen();
+  }
+  renderPanel();
+}
+function renderPanel(){
+  var p=$('panel');
+  if(cur.mode==='cards'){
+    var deck=cur.deck, c=deck[cur.card];
+    p.innerHTML='<div class="meta"><span class="tag">'+SUBJ[cur.subj].note+'</span><span>'+(cur.card+1)+' / '+deck.length+'</span></div>'+
+      '<div class="flash" id="flash" role="button" tabindex="0"><div class="front">'+c.f+'</div>'+
+      (cur.flip?'<div class="back">'+c.b+'</div>':'<div class="hint">눌러서 뜻 보기</div>')+'</div>'+
+      '<div class="row"><button type="button" data-c="prev">이전</button><button type="button" data-c="mix">섞기</button><button type="button" data-c="next">다음</button></div>';
+    return;
+  }
+  var q=cur.q;
+  if(!q){
+    p.innerHTML='<div class="empty">'+cur.subj+' 오답 노트가 비어 있습니다.<br>틀린 문제가 여기에 모입니다.</div>';
+    return;
+  }
+  var h='<div class="meta"><span class="tag">'+q.tag+'</span><span>'+(cur.mode==='wrong'?'맞히면 노트에서 지워집니다':'연속 정답 '+cur.streak)+'</span></div>'+
+    '<p class="q">'+q.q+'</p><div class="choices">';
+  q.choices.forEach(function(c,i){
+    var cls='';
+    if(cur.done){ if(i===q.a) cls='ok'; else if(i===cur.sel) cls='no'; }
+    h+='<button type="button" data-i="'+i+'" class="'+cls+'"'+(cur.done?' disabled':'')+'>'+c+'</button>';
+  });
+  h+='</div>';
+  if(cur.done){
+    h+='<div class="explain"><b>'+(cur.sel===q.a?'정답!':'오답')+'</b> '+q.ex+'</div>'+
+       '<button type="button" class="next" id="next">다음 문제</button>';
+  }
+  p.innerHTML=h;
+  if(cur.done) $('next').focus();
+}
+function answer(i){
+  if(cur.done||!cur.q) return;
+  var q=cur.q, ok=(i===q.a);
+  cur.sel=i; cur.done=true;
+  store.day.n++; store.score[cur.subj].n++;
+  if(ok){ store.day.c++; store.score[cur.subj].c++; cur.streak++; }
+  else cur.streak=0;
+  if(cur.mode==='wrong'){
+    if(ok) store.wrong=store.wrong.filter(function(w){return w!==q;});
+  }else if(!ok){
+    var dup=store.wrong.some(function(w){return w.s===cur.subj&&w.q===q.q;});
+    if(!dup){
+      store.wrong.push({s:cur.subj,tag:q.tag,q:q.q,choices:q.choices,a:q.a,ex:q.ex});
+      if(store.wrong.length>200) store.wrong.shift();
+    }
+  }
+  save(); renderTabs(); renderStats(); renderPanel();
+}
+function setMode(m){
+  cur.mode=m; cur.streak=0;
+  if(m==='cards'){ cur.deck=SUBJ[cur.subj].cards.slice(); cur.card=0; cur.flip=false; renderTabs(); renderPanel(); }
+  else { cur.q=null; renderTabs(); nextQ(); }
+}
+
+$('tabs').addEventListener('click',function(e){
+  var b=e.target.closest('button'); if(!b) return;
+  cur.subj=b.dataset.s; setMode('quiz');
+});
+$('modes').addEventListener('click',function(e){
+  var b=e.target.closest('button'); if(!b) return;
+  setMode(b.dataset.m);
+});
+$('panel').addEventListener('click',function(e){
+  var b=e.target.closest('button');
+  if(b&&b.dataset.i!==undefined){ answer(+b.dataset.i); return; }
+  if(b&&b.id==='next'){ nextQ(); return; }
+  if(b&&b.dataset.c){
+    var n=cur.deck.length;
+    if(b.dataset.c==='next') cur.card=(cur.card+1)%n;
+    if(b.dataset.c==='prev') cur.card=(cur.card+n-1)%n;
+    if(b.dataset.c==='mix'){ cur.deck=shuffle(cur.deck); cur.card=0; }
+    cur.flip=false; renderPanel(); return;
+  }
+  if(e.target.closest('#flash')){ cur.flip=!cur.flip; renderPanel(); }
+});
+document.addEventListener('keydown',function(e){
+  if(cur.mode==='cards'){
+    if(e.key===' '||e.key==='Enter'){ if(document.activeElement&&document.activeElement.tagName==='BUTTON') return; e.preventDefault(); cur.flip=!cur.flip; renderPanel(); }
+    return;
+  }
+  if(!cur.done&&cur.q&&e.key>='1'&&e.key<=String(cur.q.choices.length)) answer(+e.key-1);
+});
+$('reset').addEventListener('click',function(){
+  if(confirm('점수와 오답 노트를 모두 지울까요?')){ store=blank(); save(); setMode('quiz'); renderStats(); }
+});
+
+renderStats(); setMode('quiz');
+})();
+</script>
+</body>
+</html>
