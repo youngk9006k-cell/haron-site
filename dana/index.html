@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>다나 공부</title>
+<title>다나 공부 · 수능 D-day</title>
 <style>
   :root{
     --bg:#f4f2ec; --card:#ffffff; --ink:#1b1a17; --soft:#6a675f; --line:#e0dcd0;
@@ -69,6 +69,33 @@
   .stats div{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:10px 4px; text-align:center; font-size:12px; color:var(--soft);}
   .stats strong{display:block; font-size:17px; color:var(--ink); font-variant-numeric:tabular-nums;}
   .reset{display:block; margin:18px auto 0; font:inherit; font-size:12px; color:var(--soft); background:none; border:0; text-decoration:underline; cursor:pointer;}
+  .dday{background:var(--accent); color:var(--accent-ink); border-radius:16px; padding:18px; margin-bottom:10px;}
+  .dday .top{display:flex; align-items:baseline; justify-content:space-between; gap:10px;}
+  .dday .d{font-size:40px; font-weight:800; letter-spacing:-0.02em; line-height:1.1; font-variant-numeric:tabular-nums;}
+  .dday .lbl{font-size:13px; opacity:.9; text-align:right;}
+  .dday .bar{height:6px; border-radius:3px; background:rgba(255,255,255,.3); margin-top:14px; overflow:hidden;}
+  .dday .bar i{display:block; height:100%; background:currentColor; border-radius:3px;}
+  .dday .sub{display:flex; justify-content:space-between; font-size:12px; opacity:.9; margin-top:6px; font-variant-numeric:tabular-nums;}
+  .views{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:14px;}
+  .views button{font:inherit; font-size:16px; font-weight:700; border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:10px; padding:11px 4px; cursor:pointer;}
+  .views button[aria-pressed="true"]{background:var(--ink); color:var(--bg); border-color:var(--ink);}
+  .box{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin-bottom:10px;}
+  .box h2{font-size:16px; margin:0 0 2px; letter-spacing:-0.01em;}
+  .box .when{font-size:13px; color:var(--soft); font-variant-numeric:tabular-nums;}
+  .box .goal{font-size:14px; margin:8px 0 4px; word-break:keep-all;}
+  .box.now{border-color:var(--accent); border-width:2px;}
+  .box.past{opacity:.6;}
+  .badge{display:inline-block; font-size:11px; font-weight:700; background:var(--accent); color:var(--accent-ink); border-radius:6px; padding:1px 7px; margin-left:6px; vertical-align:2px;}
+  .head{display:flex; justify-content:space-between; align-items:flex-start; gap:10px; cursor:pointer;}
+  .cnt{font-size:13px; color:var(--soft); white-space:nowrap; font-variant-numeric:tabular-nums; padding-top:2px;}
+  .todo{list-style:none; margin:8px 0 0; padding:0;}
+  .todo label{display:flex; gap:10px; align-items:flex-start; padding:7px 0; font-size:15px; cursor:pointer; word-break:keep-all; border-top:1px solid var(--line);}
+  .todo input{width:20px; height:20px; margin:2px 0 0; flex:none; accent-color:var(--accent);}
+  .todo input:checked + span{color:var(--soft); text-decoration:line-through;}
+  .todo b{color:var(--accent); font-weight:700;}
+  .examset{font-size:13px; color:var(--soft); margin:14px 2px 0; word-break:keep-all;}
+  .examset input{font:inherit; font-size:14px; padding:6px 8px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--ink); margin-top:6px;}
+  [hidden]{display:none !important;}
   button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
 </style>
 </head>
@@ -78,11 +105,16 @@
     <h1>다나 공부</h1>
     <div class="today" id="today"></div>
   </header>
-  <div class="tabs" id="tabs"></div>
-  <div class="modes" id="modes"></div>
-  <div class="panel" id="panel"></div>
-  <div class="stats" id="stats"></div>
-  <button class="reset" id="reset">기록 지우기</button>
+  <div class="dday" id="dday"></div>
+  <div class="views" id="views"></div>
+  <section id="plan"></section>
+  <section id="study" hidden>
+    <div class="tabs" id="tabs"></div>
+    <div class="modes" id="modes"></div>
+    <div class="panel" id="panel"></div>
+    <div class="stats" id="stats"></div>
+    <button class="reset" id="reset">문제 기록 지우기</button>
+  </section>
 </div>
 
 <script>
@@ -121,7 +153,7 @@ function numMc(tag,q,ans,ex,extra){
   return mc(tag,q,fmt(ans),cand.map(fmt),ex);
 }
 
-/* ---------- 수학 (수학Ⅰ·Ⅱ) ---------- */
+/* ---------- 수학 (대수·미적분Ⅰ) ---------- */
 var TRIG={
   ang:[[30,'π/6'],[45,'π/4'],[60,'π/3'],[120,'2π/3'],[135,'3π/4'],[150,'5π/6']],
   sin:['1/2','√2/2','√3/2','√3/2','√2/2','1/2'],
@@ -305,7 +337,7 @@ function genHj(){
 
 /* ---------- 과목 ---------- */
 var SUBJ={
-  '수학':{gen:genMath,note:'수학Ⅰ·Ⅱ 계산'},
+  '수학':{gen:genMath,note:'대수·미적분Ⅰ 계산'},
   '영어':{gen:genEn,note:'수능 어휘 '+EN.length+'개',cards:EN.map(function(w){return {f:w[0],b:w[1]};})},
   '국어':{gen:genKo,note:'맞춤법·문법·문학 개념 '+KO.length+'문항'},
   '한자':{gen:genHj,note:'한자 성어 '+HJ.length+'개',cards:HJ.map(function(h){return {f:h[0],b:h[1]+'<br>'+h[2]};})}
@@ -315,7 +347,8 @@ var NAMES=Object.keys(SUBJ);
 /* ---------- 기록 ---------- */
 var KEY='dana-study-v1';
 function today(){var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
-function blank(){var s={wrong:[],score:{},day:{date:today(),n:0,c:0}};NAMES.forEach(function(n){s.score[n]={n:0,c:0};});return s;}
+var EXAM_DEFAULT='2027-11-18';
+function blank(){var s={wrong:[],score:{},day:{date:today(),n:0,c:0,todo:{}},plan:{},exam:EXAM_DEFAULT};NAMES.forEach(function(n){s.score[n]={n:0,c:0};});return s;}
 function load(){
   var s=blank();
   try{
@@ -323,7 +356,9 @@ function load(){
     if(r&&r.score&&r.wrong){
       s.wrong=r.wrong;
       NAMES.forEach(function(n){if(r.score[n]) s.score[n]=r.score[n];});
-      if(r.day&&r.day.date===today()) s.day=r.day;
+      if(r.day&&r.day.date===today()){ s.day=r.day; if(!s.day.todo) s.day.todo={}; }
+      if(r.plan) s.plan=r.plan;
+      if(/^\d{4}-\d{2}-\d{2}$/.test(r.exam||'')) s.exam=r.exam;
     }
   }catch(e){}
   return s;
@@ -441,6 +476,7 @@ $('panel').addEventListener('click',function(e){
   if(e.target.closest('#flash')){ cur.flip=!cur.flip; renderPanel(); }
 });
 document.addEventListener('keydown',function(e){
+  if($('study').hidden) return;
   if(cur.mode==='cards'){
     if(e.key===' '||e.key==='Enter'){ if(document.activeElement&&document.activeElement.tagName==='BUTTON') return; e.preventDefault(); cur.flip=!cur.flip; renderPanel(); }
     return;
@@ -448,9 +484,132 @@ document.addEventListener('keydown',function(e){
   if(!cur.done&&cur.q&&e.key>='1'&&e.key<=String(cur.q.choices.length)) answer(+e.key-1);
 });
 $('reset').addEventListener('click',function(){
-  if(confirm('점수와 오답 노트를 모두 지울까요?')){ store=blank(); save(); setMode('quiz'); renderStats(); }
+  if(confirm('점수와 오답 노트를 모두 지울까요? (계획표 체크는 그대로 둡니다)')){ var b=blank(); b.plan=store.plan; b.exam=store.exam; b.day.todo=store.day.todo; store=b; save(); setMode('quiz'); renderStats(); }
 });
 
+/* ---------- 수능 D-day 계획표 ---------- */
+var START='2026-11-12';
+var DAILY=['영어 단어 30개 외우고 어제 것 복습','국어 독서 지문 2개 (시간 재고)','수학 문제 20개 + 틀린 것 다시 풀기','오늘 공부한 것 10분 훑어보기'];
+/* [제목, 시작, 끝, 목표, 할 일들]  끝·시작의 'E-30' 은 수능일 기준 */
+var PHASES=[
+['2학기 기말 + 구멍 찾기','2026-11-12','2026-12-31','고2를 잘 마무리하고, 겨울방학에 메울 구멍을 찾는 시기',[
+  ['내신','2학기 기말고사 준비를 가장 먼저 (고2 성적도 수시에 들어감)'],
+  ['수학','대수·미적분Ⅰ 단원별로 “남에게 설명 못 하는 개념” 목록 만들기'],
+  ['영어','수능 어휘 하루 30개 시작하기'],
+  ['국어','고2 학력평가 국어 1회분을 80분 재고 풀어 약한 영역 확인'],
+  ['계획','겨울방학 교재·강의 정하기 (과목당 하나만)']]],
+['겨울방학: 개념 완성','2027-01-01','2027-02-28','1년 중 가장 긴 자습 시간. 전 과목 개념을 한 바퀴 끝낸다',[
+  ['수학','대수·미적분Ⅰ 개념 1회독 + 쉬운 기출(2·3점)'],
+  ['수학','확률과 통계 개념 시작'],
+  ['국어','문학 개념어 정리, 언어(문법) 개념 1회독'],
+  ['국어','독서 지문 매일 2개씩 꾸준히'],
+  ['영어','어휘 1회독 끝내기 + 구문 독해 매일 10문장'],
+  ['탐구','통합사회·통합과학 개념 복습 1회독'],
+  ['한국사','시대 흐름 한 번 훑기'],
+  ['생활','기상 시간 고정, 주 1회는 시간 재고 실전처럼 풀기']]],
+['3~4월: 첫 모의고사와 중간고사','2027-03-01','2027-04-30','고3 첫 성적표로 현재 위치를 확인한다',[
+  ['모의고사','3월 학력평가 응시 — 점수보다 오답 원인 분류 (개념 부족 / 시간 부족 / 실수)'],
+  ['수학','확률과 통계 개념 마무리, 3점 기출 완성하고 4점 시작'],
+  ['국어·영어','기출 주 2회분씩 시간 재고 풀기'],
+  ['내신','1학기 중간고사 3주 전부터 내신 준비'],
+  ['진로','가고 싶은 대학·학과 3곳의 전형 조사 (수시·정시 어느 쪽이 유리한지)']]],
+['5~6월: 6월 모의평가','2027-05-01','2027-06-30','평가원 6월 모의평가로 약점을 정확히 짚는다',[
+  ['모의고사','6월 모의평가 전 과목 실전처럼 응시 (수능과 가장 비슷한 시험)'],
+  ['분석','모의평가 뒤 과목별 약점 단원 3개씩 뽑기'],
+  ['수학','4점 기출 유형별로 풀기'],
+  ['영어','빈칸·순서·문장 삽입 유형 집중'],
+  ['내신','1학기 기말고사 (수시에 들어가는 마지막 내신)']]],
+['여름방학: 약점 집중','2027-07-01','2027-08-31','성적이 가장 많이 바뀌는 시기. 약점 단원만 판다',[
+  ['전 과목','6월 모의평가에서 뽑은 약점 단원 집중 공부'],
+  ['전 과목','기출 2회독 (틀렸던 문제 위주)'],
+  ['실전','주 1회 전 과목 실전 모의고사'],
+  ['수시','지원할 대학 6곳 후보 정리, 논술·면접 필요한지 확인'],
+  ['생활','수능 시간표(08:40 국어 시작)에 맞춰 하루 보내기']]],
+['9월: 9월 모의평가 + 수시 원서','2027-09-01','2027-09-30','마지막 평가원 모의평가. 수시 지원을 결정한다',[
+  ['모의고사','9월 모의평가 응시 — 수시 지원 최종 판단 근거'],
+  ['수시','수시 원서 접수 (날짜는 학교·대학 공지 확인)'],
+  ['공부','원서 쓰는 기간에도 하루 공부량 지키기'],
+  ['실전','실전 모의고사 주 2회']]],
+['10월: 실전 연습','2027-10-01','E-31','새로운 것은 그만. 시험 보는 연습을 한다',[
+  ['실전','실전 모의고사 주 2~3회, 수능과 같은 시각에'],
+  ['오답','오답 노트 줄이기 — 다시 틀린 것만 남기기'],
+  ['주의','새 교재·새 강의 시작하지 않기'],
+  ['수시','수능 최저 기준이 걸린 과목 점검']]],
+['마지막 30일','E-30','E-0','봤던 것만 다시 본다. 몸 상태가 점수다',[
+  ['복습','오답 노트와 개념 정리본만 반복'],
+  ['생활','잠드는 시간·일어나는 시간 고정 (06:30 기상)'],
+  ['준비물','수험표·신분증·아날로그 시계·도시락 챙기기, 전날 예비소집 가기'],
+  ['전날','새 문제 풀지 않고 일찍 자기']]]
+];
+function toDate(s){var a=s.split('-');return new Date(+a[0],+a[1]-1,+a[2]);}
+function day0(){var d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate());}
+function diff(a,b){return Math.round((a-b)/86400000);}
+function rel(s){ if(s.charAt(0)!=='E') return toDate(s); var d=toDate(store.exam); d.setDate(d.getDate()-(+s.slice(2))); return d; }
+function md(d){return d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate();}
+var view='plan', openPhase=null;
+
+function renderDday(){
+  var ex=toDate(store.exam), t=day0(), left=diff(ex,t);
+  var total=Math.max(1,diff(ex,toDate(START))), passed=Math.min(total,Math.max(0,diff(t,toDate(START))));
+  var wk=['일','월','화','수','목','금','토'][ex.getDay()];
+  var d=left>0?'D-'+left:(left===0?'D-DAY':'D+'+(-left));
+  $('dday').innerHTML='<div class="top"><div class="d">'+d+'</div><div class="lbl">2028학년도 수능<br>'+md(ex)+' ('+wk+')</div></div>'+
+    '<div class="bar"><i style="width:'+(passed/total*100).toFixed(1)+'%"></i></div>'+
+    '<div class="sub"><span>'+(left>0?Math.floor(left/7)+'주 '+(left%7)+'일 남음':'수고했어요')+'</span><span>'+Math.round(passed/total*100)+'% 지남</span></div>';
+}
+function renderViews(){
+  $('views').innerHTML=[['plan','계획표'],['study','문제 풀기']].map(function(v){
+    return '<button type="button" data-v="'+v[0]+'" aria-pressed="'+(v[0]===view)+'">'+v[1]+'</button>';
+  }).join('');
+  $('plan').hidden=view!=='plan'; $('study').hidden=view!=='study';
+}
+function renderPlan(){
+  var t=day0(), h='';
+  var dn=DAILY.filter(function(x,i){return store.day.todo[i];}).length;
+  h+='<div class="box"><div class="head" style="cursor:default"><div><h2>오늘 할 일</h2><div class="when">매일 새로 시작</div></div><div class="cnt">'+dn+' / '+DAILY.length+'</div></div><ul class="todo">'+
+    DAILY.map(function(x,i){return '<li><label><input type="checkbox" data-d="'+i+'"'+(store.day.todo[i]?' checked':'')+'><span>'+x+'</span></label></li>';}).join('')+'</ul></div>';
+  PHASES.forEach(function(p,i){
+    var s=rel(p[1]), e=rel(p[2]);
+    var st=t<s?'later':(t>e?'past':'now');
+    var open=openPhase===null?st==='now':openPhase===i;
+    var done=p[4].filter(function(x,j){return store.plan[i+'-'+j];}).length;
+    var dTo=diff(toDate(store.exam),s);
+    h+='<div class="box '+st+'"><div class="head" data-p="'+i+'" role="button" tabindex="0" aria-expanded="'+open+'"><div><h2>'+(i+1)+'. '+p[0]+(st==='now'?'<span class="badge">지금</span>':'')+'</h2>'+
+      '<div class="when">'+md(s)+' ~ '+md(e)+' · D-'+dTo+'부터</div></div><div class="cnt">'+done+' / '+p[4].length+'</div></div>';
+    if(open){
+      h+='<p class="goal">'+p[3]+'</p><ul class="todo">'+p[4].map(function(x,j){
+        var id=i+'-'+j;
+        return '<li><label><input type="checkbox" data-t="'+id+'"'+(store.plan[id]?' checked':'')+'><span><b>'+x[0]+'</b> '+x[1]+'</span></label></li>';
+      }).join('')+'</ul>';
+    }
+    h+='</div>';
+  });
+  h+='<div class="examset">수능 날짜는 예년처럼 11월 셋째 주 목요일로 넣어 두었습니다. 공지된 날짜와 다르면 바꾸세요. 모의고사·원서 접수 날짜도 학교 공지로 확인하세요.<br>'+
+     '<label>수능 날짜 <input type="date" id="exam" value="'+store.exam+'"></label></div>';
+  $('plan').innerHTML=h;
+}
+$('views').addEventListener('click',function(e){
+  var b=e.target.closest('button'); if(!b) return;
+  view=b.dataset.v; renderViews();
+});
+$('plan').addEventListener('click',function(e){
+  var hd=e.target.closest('.head[data-p]'); if(!hd) return;
+  var i=+hd.dataset.p, isOpen=hd.getAttribute('aria-expanded')==='true';
+  openPhase=isOpen?-1:i; renderPlan();
+});
+$('plan').addEventListener('keydown',function(e){
+  var hd=e.target.closest('.head[data-p]');
+  if(hd&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); hd.click(); }
+});
+$('plan').addEventListener('change',function(e){
+  var t=e.target;
+  if(t.dataset.t){ if(t.checked) store.plan[t.dataset.t]=1; else delete store.plan[t.dataset.t]; }
+  else if(t.dataset.d){ if(t.checked) store.day.todo[t.dataset.d]=1; else delete store.day.todo[t.dataset.d]; }
+  else if(t.id==='exam'){ if(!/^\d{4}-\d{2}-\d{2}$/.test(t.value)) return; store.exam=t.value; renderDday(); }
+  save(); renderPlan();
+});
+
+renderDday(); renderViews(); renderPlan();
 renderStats(); setMode('quiz');
 })();
 </script>
