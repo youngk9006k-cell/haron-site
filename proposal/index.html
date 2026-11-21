@@ -29,6 +29,11 @@
  .meta{font-size:12px;color:var(--sub);margin:0 0 12px}
  footer{border-top:1px solid var(--line);background:#fff;padding:18px 0 34px;color:var(--sub);font-size:12.5px;line-height:1.7}
  .notice{background:#fff;border:1px solid var(--line);border-left:4px solid var(--pt);border-radius:10px;padding:12px 14px;color:var(--sub);font-size:13px;line-height:1.7;margin:4px 0 0}
+ .shots{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 12px}
+ .shots img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:8px;display:block;pointer-events:none;-webkit-user-drag:none}
+ .card.wide{grid-column:1/-1}
+ @media (min-width:720px){.card.wide .shots{grid-template-columns:repeat(4,1fr)}}
+ .sec-t{font-size:15px;font-weight:800;margin:18px 0 0;color:var(--pt);letter-spacing:-.2px}
  @media print{body{display:none}}
 </style>
 </head>
@@ -62,6 +67,34 @@
       <p class="meta">열린 통로 · 폴딩 도어 · 세이지 그린 벽</p>
       <p>벽을 남기고 둥근 열린 통로와 고정창을 낸 안입니다. 벽 마감을 세이지 그린으로 맞추고 수납과 전시 공간을 함께 두었습니다.</p>
       <a class="go" href="/science/a2/" target="_blank" rel="noopener">360&deg; 둘러보기</a>
+    </article>
+  </section>
+
+  <p class="sec-t">3D 제안 그림</p>
+  <section class="grid">
+    <article class="card wide">
+      <div><span class="tag">교육시설 · 다목적실</span> <span class="tag" style="background:#3b7a57">제안 → 시공</span></div>
+      <h2>한국어랭귀지스쿨 다목적실 리모델링 제안</h2>
+      <p class="meta">목공 루바 · 판서판 · 수납장 · 벤치 · 간접조명</p>
+      <p>공사 전에 벽 마감 색과 판서판·수납장 자리를 3D로 먼저 보여 드리고, 고르신 안 그대로 시공했습니다. 시공 사진은 첫 화면 시공사례에서 보실 수 있습니다.</p>
+      <div class="shots"><img src="img/lang1_s.jpg" alt="다목적실 제안 3D 1" loading="lazy"><img src="img/lang2_s.jpg" alt="다목적실 제안 3D 2" loading="lazy"></div>
+      <a class="go" href="/#portfolio">시공 사진 보기</a>
+    </article>
+
+    <article class="card wide">
+      <div><span class="tag">학교 · 식당 · 휴게실</span></div>
+      <h2>특수학교 식당·휴게실 개선 제안</h2>
+      <p class="meta">배식 구역 색 구분 · 휠체어 자리 · 흡음 패널 · 쉼터 · 유리 칸막이</p>
+      <p>학생이 스스로 길과 자리를 찾을 수 있게 바닥 색과 번호로 구역을 나누고, 휠체어 자리와 조용히 쉴 수 있는 쉼터를 둔 안입니다.</p>
+      <div class="shots"><img src="img/dream1_s.jpg" alt="식당 배식대 제안 3D" loading="lazy"><img src="img/dream2_s.jpg" alt="창가 식사대 제안 3D" loading="lazy"><img src="img/dream3_s.jpg" alt="휴게실 쉼터 제안 3D" loading="lazy"><img src="img/dream4_s.jpg" alt="전체 배치 제안 3D" loading="lazy"></div>
+    </article>
+
+    <article class="card wide">
+      <div><span class="tag">학교 · 전산실</span></div>
+      <h2>고등학교 AI 전산실 환경개선 제안</h2>
+      <p class="meta">전자칠판 벽 · 둥근 템바 · 수납장 · 타공 게시판 · 블라인드</p>
+      <p>앞벽에 전자칠판과 판서판을 모으고, 뒤벽과 창가에 수납을 넣어 컴퓨터 수업에 맞춘 안입니다. 위에서 본 배치도로 자리 배치까지 한눈에 보실 수 있습니다.</p>
+      <div class="shots"><img src="img/lab1_s.jpg" alt="전산실 앞벽 제안 3D" loading="lazy"><img src="img/lab2_s.jpg" alt="전산실 뒤벽 제안 3D" loading="lazy"><img src="img/lab3_s.jpg" alt="전산실 복도측 제안 3D" loading="lazy"><img src="img/lab4_s.jpg" alt="전산실 배치 제안 3D" loading="lazy"></div>
     </article>
   </section>
 
