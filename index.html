@@ -355,6 +355,12 @@
     .case-photos.pt{grid-template-columns:repeat(2,1fr);gap:8px;}
   }
   .case p.note{font-size:14.5px;color:var(--ink-soft);margin-top:20px;line-height:1.8;max-width:640px;}
+  .case-photos.ls{grid-template-columns:repeat(3,1fr);grid-template-rows:auto;}
+  .case-photos.ls a{aspect-ratio:16/10;grid-row:auto;}
+  .case-photos.ls a span{position:absolute;left:0;right:0;bottom:0;padding:7px 10px;font-size:12.5px;font-weight:700;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.6));}
+  @media(max-width:720px){.case-photos.ls{grid-template-columns:repeat(2,1fr);gap:8px;}}
+  .go3d{display:inline-block;margin-top:18px;padding:14px 22px;background:var(--wood);color:#181410;font-weight:700;font-size:15px;text-decoration:none;}
+  .go3d:hover{background:var(--wood-soft);}
 
   /* ---------- CONTACT ---------- */
   .contact{background:var(--navy);color:#fff;position:relative;overflow:hidden;}
@@ -793,6 +799,30 @@
         <a class="small" href="img/p13_d967a21b.jpg" target="_blank" rel="noopener"><img src="img/p13_d967a21b_s.jpg" alt="아파트 붙박이장·드레스룸 시공 사진 - 벽 전체 붙박이장" loading="lazy"></a>
       </div>
       <p class="note">벽 전체를 붙박이장으로 채우고, 드레스룸은 선반·옷걸이 칸을 나눈 시스템장으로 수납을 늘린 현장입니다.</p>
+    </div>
+
+    <div class="case reveal" id="home3d">
+      <div class="case-head">
+        <div>
+          <span class="case-no mono">3D 그림</span>
+          <h3>3D로 미리 보는 우리 집</h3>
+        </div>
+        <div class="case-meta">
+          <div>구분<b>아파트 (민간)</b></div>
+          <div>스타일<b>화이트·웜 미니멀·호텔식</b></div>
+          <div>공간<b>거실·주방·욕실</b></div>
+        </div>
+      </div>
+      <div class="case-photos ls">
+        <a href="img/home3d1.jpg" target="_blank" rel="noopener"><img src="img/home3d1_s.jpg" alt="3D 그림 - 화이트 스타일 거실" loading="lazy"><span>화이트 · 거실</span></a>
+        <a href="img/home3d2.jpg" target="_blank" rel="noopener"><img src="img/home3d2_s.jpg" alt="3D 그림 - 화이트 스타일 주방" loading="lazy"><span>화이트 · 주방</span></a>
+        <a href="img/home3d3.jpg" target="_blank" rel="noopener"><img src="img/home3d3_s.jpg" alt="3D 그림 - 웜 미니멀 스타일 거실" loading="lazy"><span>웜 미니멀 · 거실</span></a>
+        <a href="img/home3d4.jpg" target="_blank" rel="noopener"><img src="img/home3d4_s.jpg" alt="3D 그림 - 웜 미니멀 스타일 주방" loading="lazy"><span>웜 미니멀 · 주방</span></a>
+        <a href="img/home3d5.jpg" target="_blank" rel="noopener"><img src="img/home3d5_s.jpg" alt="3D 그림 - 호텔식 스타일 거실" loading="lazy"><span>호텔식 · 거실</span></a>
+        <a href="img/home3d6.jpg" target="_blank" rel="noopener"><img src="img/home3d6_s.jpg" alt="3D 그림 - 호텔식 스타일 욕실" loading="lazy"><span>호텔식 · 욕실</span></a>
+      </div>
+      <p class="note">공사 전에 우리 집 구조 그대로 3D 그림을 만들어, 색과 분위기를 먼저 보고 고르실 수 있습니다. 위 그림은 23평 아파트로 만든 본보기입니다.</p>
+      <a class="go3d" href="songnae/">송내 주공1단지 리모델링 안내 보기 &rarr;</a>
     </div>
 
 
